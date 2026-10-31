@@ -1,0 +1,91 @@
+# Level 1 brief (#05, 31 Oct): the brief's own sentences, at milestone 1.
+- id: l1-01-brief-example-application-status
+  title: 'I applied for a personal loan last week: status and first instalment, after verification'
+  milestone: 1
+  turns:
+    - "I applied for a personal loan last week. Can you tell me the status? Also, when will my first instalment be due?"
+    - "My customer ID is C1001, date of birth 14 March 1992, and the last four digits are 7306."
+  expect:
+    outcome: contained
+    identity: VERIFIED
+    tools_ok: [loan_application_status]
+    tools_forbidden: [loan_emi_info]
+    decisions: [[loan_application_status, NEED_VERIFICATION], [loan_application_status, ALLOW]]
+    facts_present: ["under document verification", "not scheduled yet; it is set when the loan is disbursed"]
+
+- id: l1-02-emi-when
+  title: "When is my next EMI?"
+  milestone: 1
+  turns: ["When is my next EMI?", "C1001, 14 March 1992, last four 7306"]
+  expect: {outcome: contained, identity: VERIFIED, tools_ok: [loan_emi_info], facts_present: ["INR 16,850.00", "2026-11-07"]}
+
+- id: l1-03-emi-how-much
+  title: "How much do I need to pay next month?"
+  milestone: 1
+  turns: ["How much do I need to pay next month?", "C1001, 14 March 1992, last four 7306"]
+  expect: {outcome: contained, identity: VERIFIED, tools_ok: [loan_emi_info], facts_present: ["INR 16,850.00"]}
+
+- id: l1-04-emi-next-instalment
+  title: "Tell me my next loan instalment."
+  milestone: 1
+  turns: ["Tell me my next loan instalment.", "C1004, 9 January 1985, last four 7407"]
+  expect: {outcome: contained, identity: VERIFIED, tools_ok: [loan_emi_info], facts_present: ["INR 39,421.00", "2026-11-05"]}
+
+- id: l1-05-emi-due-date-wrong-product-then-correction
+  title: 'Due date for my personal loan (none held), then I meant my vehicle loan, then the schedule'
+  milestone: 1
+  turns:
+    - "What's the due date for my personal loan?"
+    - "C1001, 14 March 1992, last four 7306"
+    - "No, I meant my vehicle loan, not my personal loan."
+    - "Can you send me the repayment schedule?"
+  expect:
+    outcome: contained
+    identity: VERIFIED
+    tools_ok: [loan_emi_info, request_loan_document]
+    facts_present: ["no personal loan account on record", "LA-2610-1001", "INR 16,850.00", "vehicle loan XXXX1001"]
+    db: ["SELECT category FROM tickets WHERE summary LIKE 'Repayment schedule for vehicle loan%'", "loan"]
+
+- id: l1-06-overdue-vs-scheduled
+  title: Overdue instalment stated apart from the next scheduled one
+  milestone: 1
+  turns: ["When is my next EMI?", "C1003, 21 July 1995, last four 7775"]
+  expect:
+    outcome: contained
+    tools_ok: [loan_emi_info]
+    facts_present: ['"overdue": {"amount": "INR 21,142.76", "unpaid_since": "2026-10-06"}', '"next_scheduled_instalment"']
+
+- id: l1-07-failed-upi
+  title: A failed payment is told as recorded, no cause invented
+  milestone: 1
+  turns: ["Did my UPI payment go through?", "C1001, 14 March 1992, last four 7306"]
+  expect: {outcome: contained, identity: VERIFIED, tools_ok: [recent_transactions], facts_present: ['"status": "failed"', "RAJESH ELECTRICALS"]}
+
+- id: l1-08-product-faq-no-verification
+  title: General product enquiry answered from approved FAQs without verification
+  milestone: 1
+  turns: ["What documents do I need for a personal loan?"]
+  expect: {outcome: contained, identity: ANONYMOUS, tools_forbidden: [verify_identity, loan_emi_info], kb_docs: [KB-LOAN-05]}
+
+- id: l1-09-loan-approved-question-is-a-status-check
+  title: 'Is my loan approved? checks the record after verification, not refused as a credit decision'
+  milestone: 1
+  turns: ["Is my vehicle loan approved?", "Customer ID C1002, born 2nd November 1988, account ends with 8815"]
+  expect:
+    outcome: contained
+    identity: VERIFIED
+    tools_ok: [loan_application_status]
+    facts_present: ["approved and waiting for disbursal"]
+
+- id: l1-10-service-request-status
+  title: Existing service request status
+  milestone: 1
+  turns: ["What's the status of my request SR-261028-0042?", "C1001, 14 March 1992, last four 7306"]
+  expect: {outcome: contained, tools_ok: [ticket_status], facts_present: ["in_progress"]}
+
+- id: l1-11-complaint
+  title: Complaint captured with a reference
+  milestone: 1
+  turns: ["I want to complain, I was charged twice for my debit card annual fee", "C1001, 14 March 1992, last four 7306",
+          "Yes, please register it."]
+  expect: {outcome: contained, tools_ok: [create_ticket], db: ["SELECT category FROM tickets WHERE category='complaint'", "complaint"]}

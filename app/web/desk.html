@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova Trust Agent Desk</title>
+<link rel="icon" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/shared.css">
+<style>
+  .layout { display: grid; grid-template-columns: minmax(280px, 340px) 1fr; gap: 20px; align-items: start; }
+  .queue { display: grid; gap: 8px; max-height: 70vh; overflow-y: auto; }
+  .item { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; }
+  .item[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+  .item .top { display: flex; justify-content: space-between; gap: 8px; font-weight: 650; }
+  .item .sub { color: var(--muted); font-size: 13px; }
+  .item.new { animation: pulse 1.2s ease-out 2; }
+  @keyframes pulse { 50% { background: var(--accent-soft); } }
+  .head { display: flex; justify-content: space-between; align-items: start; gap: 12px; flex-wrap: wrap; }
+  .head h1 { font-size: 20px; margin: 0 0 6px; }
+  .summary { font-size: 15.5px; background: var(--sunken); border-radius: 12px; padding: 12px 14px; margin: 14px 0; }
+  .next { border-left: 4px solid var(--accent); padding: 8px 12px; background: var(--accent-soft); border-radius: 8px; margin-bottom: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .grid h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 6px; }
+  .grid ul { margin: 0; padding-left: 18px; font-size: 14px; }
+  .turns { display: grid; gap: 6px; font-size: 14px; }
+  .turns div { padding: 6px 10px; border-radius: 10px; background: var(--sunken); }
+  .turns .user { background: var(--accent-soft); }
+  .turns b { font-size: 11px; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .live.on i { background: var(--ok); }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } .queue { max-height: none; } }
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main>
+  <p class="notice" id="notice" hidden></p>
+  <div class="layout" id="layout">
+    <section class="card" aria-label="Handoff queue">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Handoff queue</h2><span class="live" id="live"><i></i><span>Connecting</span></span></div>
+      <div class="queue" id="queue"><div class="empty-state">No callers waiting. Handoffs from Aria appear here instantly.</div></div>
+    </section>
+    <section class="card" aria-label="Handoff detail" id="detail">
+      <div class="empty-state">Select a caller to see what Aria already did, so they never have to repeat themselves.</div>
+    </section>
+  </div>
+  <section class="card row" style="margin-top:20px;justify-content:space-between" aria-label="Test data" id="mock-card" hidden>
+    <div><h2 style="margin:0 0 4px">Test data</h2><p class="muted" style="margin:0">Add a synthetic customer (editable defaults), or a past service request on any customer, then call in as them from the Customer call screen. The demo customers C1001–C1005 already have past requests.</p></div>
+    <div class="row"><button class="btn primary" id="add-customer" type="button">+ Add test customer</button>
+      <button class="btn" id="add-ticket" type="button" hidden>+ Add service request</button></div>
+  </section>
+  <section class="card" style="margin-top:20px" aria-label="Recent service requests" id="tickets-card" hidden>
+    <h2>Recent service requests</h2>
+    <div style="overflow-x:auto"><table><thead><tr><th>Ticket</th><th>Customer</th><th>Category</th><th>Summary</th><th>Status</th><th>Raised by</th></tr></thead><tbody id="tickets"></tbody></table></div>
+  </section>
+</main>
+<script type="module" src="/assets/desk.js"></script>
+</body>
+</html>

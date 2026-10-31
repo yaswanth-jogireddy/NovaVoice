@@ -1,0 +1,82 @@
+# Replays of the first real-mic calls (30 Oct, 18:45-18:51). 5 of 7 ended in a transfer; none should.
+- id: r01-forgot-customer-id
+  title: Caller doesn't know their customer ID; verifies with the registered mobile
+  turns:
+    - "Show my customer ID"
+    - "My registered mobile is 9121913611, born 14 March 1992, last four 7306"
+  expect:
+    outcome: contained
+    tools_ok: [customer_profile]
+    decisions: [[customer_profile, NEED_VERIFICATION]]
+    facts_present: ["C1001"]
+
+- id: r02-open-account-call-back
+  title: Account opening answered from policy, call-back request raised only after a yes
+  turns:
+    - "I want to open a new account"
+    - "Yes please"
+  expect:
+    outcome: contained
+    kb_docs: [KB-ACC-01]
+    tools_ok: [create_ticket]
+
+- id: r03-one-word
+  title: '"Customer." alone gets a question, not a transfer'
+  turns:
+    - "Customer."
+  expect:
+    outcome: contained
+    no_tools: true
+
+- id: r04-vague-bank-details
+  title: A vague request is narrowed down, not transferred
+  turns:
+    - "I want to know about my bank details"
+    - "But first you have to identify me"
+  expect:
+    outcome: contained
+
+- id: r05-last-digit-full-stop
+  title: '"...last digit is 7306." verifies'
+  turns:
+    - "What's my balance?"
+    - "My customer ID is C1001, date of birth 14 March 1992 and my account number last digit is 7306."
+  expect:
+    outcome: contained
+    tools_ok: [get_balance]
+
+- id: r06-room-speech
+  title: Background Hindi chatter in an English call is not treated as a request
+  turns:
+    - "सबसे भी कम। जितना बजे है।"
+  expect:
+    outcome: contained
+    no_tools: true
+    guards: [unclear_speech]
+
+- id: r07-what-can-you-do
+  title: '"What are the services you provide?" answered directly'
+  turns:
+    - "What are the services you provide?"
+  expect:
+    outcome: contained
+    no_tools: true
+
+- id: r08-card-status
+  title: Card status after verification
+  turns:
+    - "C1002, born 2nd November 1988, account ends with 8815"
+    - "Is my card blocked?"
+  expect:
+    outcome: contained
+    tools_ok: [list_cards]
+
+- id: r09-help-continues-after-handoff
+  title: After asking for a person, Aria still helps while the colleague picks it up
+  turns:
+    - "Connect me to a real person"
+    - "Actually, what's my balance? C1001, 14 March 1992, last four 7306"
+  expect:
+    outcome: handoff
+    handoff_reason: caller_request
+    tools_ok: [get_balance]

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova Trust Supervisor</title>
+<link rel="icon" href="/assets/logo.svg">
+<link rel="stylesheet" href="/assets/shared.css">
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .kpi .label { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .kpi .value { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin: 2px 0; font-variant-numeric: tabular-nums; }
+  .kpi .note { font-size: 12.5px; color: var(--muted); }
+  .kpi.hero .value { color: var(--accent); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .cols.three { grid-template-columns: repeat(3, 1fr); }
+  .bars { display: grid; gap: 8px; }
+  .bar { display: grid; grid-template-columns: 170px 1fr 36px; gap: 10px; align-items: center; font-size: 14px; }
+  .bar .track { height: 10px; background: var(--sunken); border-radius: 99px; overflow: hidden; }
+  .bar .track i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .bar.warn .track i { background: var(--warn); }
+  .bar .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 650; }
+  .trust { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+  .pillar { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--sunken); }
+  .pillar .n { font-size: 24px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .pillar .t { font-weight: 650; font-size: 13.5px; }
+  .pillar .d { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .evals { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tier { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--sunken); }
+  .tier.used { border-color: var(--accent); }
+  .tier h3 { margin: 0 0 6px; font-size: 15px; color: var(--ink); text-transform: none; letter-spacing: 0; }
+  .tier .big { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tier dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: 13.5px; }
+  .tier dt { color: var(--muted); } .tier dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .tier-gap { margin-top: 12px; font-size: 14px; } .tier-foot { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+  .updated { font-size: 12.5px; color: var(--muted); }
+  @media (max-width: 1100px) { .trust { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 860px) { .kpis { grid-template-columns: repeat(2, 1fr); } .cols, .cols.three, .tiers { grid-template-columns: 1fr; } .bar { grid-template-columns: 120px 1fr 30px; } }
+  @media (max-width: 480px) { .trust { grid-template-columns: repeat(2, 1fr); } .kpi .value { font-size: 24px; } }
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main>
+  <p class="notice" id="notice" hidden></p>
+  <div id="board">
+    <div class="row" style="justify-content:space-between;margin-bottom:14px"><h1 style="font-size:20px;margin:0">Contact-centre impact, live</h1><span class="updated" id="updated"></span></div>
+    <div class="kpis">
+      <div class="card kpi hero"><div class="label">Solved without a human</div><div class="value" id="k-contain">—</div><div class="note" id="k-contain-n"></div></div>
+      <div class="card kpi"><div class="label">Average handle time</div><div class="value" id="k-aht">—</div><div class="note">call start to resolution or handoff</div></div>
+      <div class="card kpi"><div class="label">Cost per call: AI vs human</div><div class="value" id="k-cost">—</div><div class="note" id="k-cost-n"></div></div>
+      <div class="card kpi"><div class="label">Saved so far</div><div class="value" id="k-save">—</div><div class="note">contained calls × (human − AI cost)</div></div>
+    </div>
+    <section class="card" style="margin-bottom:20px" aria-label="Voice cost by mode">
+      <h2>Voice cost: Cost-effective vs Standard</h2>
+      <div class="tiers" id="tiers"></div>
+      <div class="tier-gap" id="tier-gap"></div>
+      <div class="tier-foot" id="tier-foot"></div>
+    </section>
+    <section class="card" style="margin-bottom:20px" aria-label="Trust by Design">
+      <h2>Trust by Design · live evidence</h2>
+      <div class="trust" id="trust"></div>
+    </section>
+    <div class="cols three">
+      <section class="card"><h2>Requests by result</h2><div class="bars" id="intent-results"></div>
+        <h2 style="margin-top:16px">Requests by type</h2><div class="bars" id="intent-types"></div></section>
+      <section class="card"><h2>Escalation reasons</h2><div class="bars" id="reasons"></div></section>
+      <section class="card"><h2>Guardrail events</h2><div class="bars" id="guards"></div></section>
+    </div>
+    <section class="card" style="margin-bottom:20px" id="evals-card" hidden>
+      <h2>Automated test calls</h2>
+      <div class="evals" id="evals"></div>
+    </section>
+    <section class="card" aria-label="Recent calls">
+      <h2>Recent calls</h2>
+      <div style="overflow-x:auto"><table><thead><tr><th>Time</th><th>Outcome</th><th>Requests → result</th><th>Identity</th><th>Handle time</th><th>AI cost</th><th>Tickets</th></tr></thead><tbody id="calls"></tbody></table></div>
+    </section>
+  </div>
+</main>
+<script type="module" src="/assets/supervisor.js"></script>
+</body>
+</html>

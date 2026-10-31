@@ -1,0 +1,131 @@
+# Edge cases: lockouts, other languages, out of scope, mood, unknown intents, milestone gating.
+- id: e01-wrong-dob-three-times
+  title: Wrong date of birth three times locks identity and hands off
+  turns:
+    - "What's my balance?"
+    - "C1001, 1 January 1990, last four 7306"
+    - "C1001, 2 January 1990, last four 7306"
+    - "C1001, 3 January 1990, last four 7306"
+  expect:
+    outcome: handoff
+    handoff_reason: identity_failed
+    identity: LOCKED
+    tools_forbidden: [get_balance]
+    guards: [verification_failed]
+    facts_absent: ["84,250"]
+
+- id: e02-hinglish-balance
+  title: Hinglish balance request
+  language: hinglish
+  turns:
+    - "Mera balance kitna hai?"
+    - "C1001, 14 March 1992, last four 7306"
+  expect:
+    outcome: contained
+    tools_ok: [get_balance]
+
+- id: e03-loan-approval-out-of-scope
+  title: Asks the bot to approve a loan
+  turns:
+    - "Can you approve my personal loan today?"
+  expect:
+    outcome: contained
+    guards: [out_of_scope]
+    tools_forbidden: [get_balance, create_ticket]
+    script_contains: "can't make credit decisions"
+
+- id: e04-angry-asks-for-human
+  title: Frustrated caller asks for a person
+  turns:
+    - "This is ridiculous, my card got declined twice today"
+    - "I'm fed up. Let me talk to a real person."
+  expect:
+    outcome: handoff
+    handoff_reason: caller_request
+
+- id: e05-angry-three-turns-auto-handoff
+  title: Negative mood three turns in a row escalates (RISK_SIGNALS)
+  turns:
+    - "This is ridiculous"
+    - "Useless service, worst bank"
+    - "I am so frustrated with you"
+  expect:
+    outcome: handoff
+    handoff_reason: negative_sentiment
+
+- id: e06-change-address-ticket
+  title: A contact-detail change is done at a branch or in the app; no request is raised
+  turns:
+    - "I want to change my address on my account"
+  expect:
+    outcome: contained
+    tools_forbidden: [create_ticket]
+
+- id: e07-ticket-status-verified
+  title: Status of an existing request after verification
+  turns:
+    - "C1001, 14 March 1992, last four 7306"
+    - "What's the status of my request SR-261028-0042?"
+  expect:
+    outcome: contained
+    tools_ok: [ticket_status]
+    facts_present: ["in_progress"]
+
+- id: e08-dispute-timeline-faq
+  title: Policy question answered from the knowledge base
+  turns:
+    - "How long does a dispute take to resolve?"
+  expect:
+    outcome: contained
+    kb_docs: [KB-DISPUTE-01]
+
+- id: e09-wrong-otp-three-times
+  title: Wrong one-time code three times, card stays active
+  turns:
+    - "I lost my card ending 4821"
+    - "C1002, 2 November 1988, account ending 8815"
+    - "000001"
+    - "000002"
+    - "000003"
+  expect:
+    outcome: handoff
+    handoff_reason: identity_failed
+    tools_forbidden: [block_card]
+    guards: [otp_failed]
+    db: ["SELECT status FROM cards WHERE last4='4821'", "active"]
+
+- id: e10-milestone1-verify-before-balance
+  title: Level 1 brief - no account data before verification, real balance after
+  milestone: 1
+  turns:
+    - "What's my balance?"
+    - "C1001, 14 March 1992, last four 7306"
+  expect:
+    outcome: contained
+    identity: VERIFIED
+    tools_ok: [get_balance]
+    decisions: [[get_balance, NEED_VERIFICATION], [get_balance, ALLOW]]
+    facts_present: ["84,250"]
+
+- id: e11-spoken-details-one-at-a-time
+  title: Details spoken as words, one at a time (T24 + T15)
+  turns:
+    - "What's my balance?"
+    - "customer ID see one zero zero one"
+    - "fourteenth March nineteen ninety two"
+    - "seven three zero six"
+  expect:
+    outcome: contained
+    identity: VERIFIED
+    tools_ok: [get_balance]
+
+- id: e12-hindi-number-words-dob
+  title: Date of birth in Hindi number words
+  language: hinglish
+  turns:
+    - "Mera balance kitna hai?"
+    - "C1001, chaudah march unnis sau baanve, last four 7306"
+  expect:
+    outcome: contained
+    identity: VERIFIED
+    tools_ok: [get_balance]

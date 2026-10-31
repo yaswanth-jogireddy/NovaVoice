@@ -1,0 +1,41 @@
+{
+  "_comment": "Voice modes and voices for the call page. Edit freely; the server validates every call against this file. Each voice is a persona: 'agent_name' is how the agent introduces itself and 'gender' sets Hindi verb forms. Sarvam speakers are bulbul:v4 voice ids (docs.sarvam.ai voices page, checked 30 Oct 2026). ElevenLabs voices use 'elevenlabs_voice_id' (account or public library) or 'elevenlabs_setting' (a .env setting). Smallest AI voices use 'smallest_voice_id' (Lightning v3.1 pool: docs.smallest.ai voices page, checked 31 Oct 2026); a voice from the Pro pool (e.g. rhea) also sets 'smallest_model': 'lightning_v3.1_pro'. Cloned voices are added from the call page into data/cloned_voices.json.",
+  "default_tier": "cost",
+  "tiers": {
+    "cost": {
+      "label": "Cost-effective",
+      "note": "Sarvam listening and speaking. About Rs 1.9 per minute (37 voice calls, 31 Oct).",
+      "tts_provider": "sarvam",
+      "languages": ["en", "hi", "hinglish"]
+    },
+    "standard": {
+      "label": "Standard",
+      "note": "Sarvam listening, ElevenLabs speaking: more natural voices, including your cloned voice. About Rs 3.6 per minute for the same calls.",
+      "tts_provider": "elevenlabs",
+      "languages": ["en", "hi", "hinglish", "ar"]
+    },
+    "smallest": {
+      "label": "Smallest AI",
+      "note": "Sarvam listening, Smallest AI Lightning v3.1 speaking (streamed). Needs SMALLEST_API_KEY.",
+      "tts_provider": "smallest",
+      "languages": ["en", "hi", "hinglish"]
+    }
+  },
+  "voices": [
+    {"id": "aria", "label": "Aria · warm customer care", "agent_name": "Aria", "gender": "female", "tier": "cost", "sarvam_speaker": "ishita_enhi_customer"},
+    {"id": "simran", "label": "Simran · banking, expressive", "agent_name": "Simran", "gender": "female", "tier": "cost", "sarvam_speaker": "simran_enhi_banking_expressive"},
+    {"id": "shubh", "label": "Shubh · banking, Hinglish", "agent_name": "Shubh", "gender": "male", "tier": "cost", "sarvam_speaker": "shubh_enhi_banking"},
+    {"id": "ritu", "label": "Ritu · warm, Hindi", "agent_name": "Ritu", "gender": "female", "tier": "cost", "sarvam_speaker": "ritu_hi_customer_warm", "languages": ["hi", "hinglish"]},
+    {"id": "ratan", "label": "Ratan · friendly, Hindi", "agent_name": "Ratan", "gender": "male", "tier": "cost", "sarvam_speaker": "ratan_hi_customer_expressive", "languages": ["hi", "hinglish"]},
+    {"id": "neha", "label": "Neha · English customer care", "agent_name": "Neha", "gender": "female", "tier": "cost", "sarvam_speaker": "neha_en_customer", "languages": ["en"]},
+    {"id": "sameer", "label": "Sameer · clear, Indian English", "agent_name": "Sameer", "gender": "male", "tier": "standard", "elevenlabs_voice_id": "FYsQqWcrmRXZmPMbXAO8"},
+    {"id": "palak", "label": "Palak · customer care, Hindi", "agent_name": "Palak", "gender": "female", "tier": "standard", "elevenlabs_voice_id": "DXV065oMyJWYWy1DO4vS"},
+    {"id": "priya", "label": "Priya · polished, composed", "agent_name": "Priya", "gender": "female", "tier": "standard", "elevenlabs_voice_id": "pK6d9s3qOoKanWljVcOX"},
+    {"id": "aakash", "label": "Aakash · respectful", "agent_name": "Aakash", "gender": "male", "tier": "standard", "elevenlabs_voice_id": "T1AwoCmA8QmjLFvOn2VV"},
+    {"id": "el-us", "label": "Bella · US English", "agent_name": "Aria", "gender": "female", "tier": "standard", "elevenlabs_setting": "elevenlabs_us_voice_id", "languages": ["en"]},
+    {"id": "el-arabic", "label": "Heba · Arabic", "agent_name": "Aria", "gender": "female", "tier": "standard", "elevenlabs_setting": "elevenlabs_arabic_voice_id", "languages": ["ar", "en"]},
+    {"id": "sm-rhea", "label": "Rhea · customer support, Hindi & Indian English (Pro)", "agent_name": "Rhea", "gender": "female", "tier": "smallest", "smallest_voice_id": "rhea", "smallest_model": "lightning_v3.1_pro"},
+    {"id": "sm-sunidhi", "label": "Sunidhi · Hindi & Indian English", "agent_name": "Sunidhi", "gender": "female", "tier": "smallest", "smallest_voice_id": "sunidhi"},
+    {"id": "sm-devansh", "label": "Devansh · Hindi & Indian English", "agent_name": "Devansh", "gender": "male", "tier": "smallest", "smallest_voice_id": "devansh"}
+  ]
+}
